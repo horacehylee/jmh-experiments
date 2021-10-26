@@ -1,0 +1,36 @@
+plugins {
+    id 'java'
+}
+
+sourceSets {
+    jmh {
+        java.srcDirs = ['src/jmh/java']
+        resources.srcDirs = ['src/jmh/resources']
+        compileClasspath += sourceSets.main.runtimeClasspath
+    }
+}
+
+group 'com.horacehylee'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+    jmhImplementation 'org.openjdk.jmh:jmh-core:1.33'
+    jmhAnnotationProcessor 'org.openjdk.jmh:jmh-generator-annprocess:1.33'
+}
+
+// https://docs.gradle.org/current/dsl/org.gradle.api.tasks.JavaExec.html
+task jmh(type: JavaExec, dependsOn: jmhClasses) {
+    main = 'org.openjdk.jmh.Main'
+    classpath = sourceSets.jmh.compileClasspath + sourceSets.jmh.runtimeClasspath
+
+    // To enable the built-in stacktrace sampling profiler
+    // args = ['-prof', 'stack']
+}
+
+// to make sure benchmarks always get compiled
+classes.finalizedBy(jmhClasses)
